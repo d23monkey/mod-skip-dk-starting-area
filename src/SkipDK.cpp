@@ -2,6 +2,7 @@
    Original Module From Single Player Project Consolidated Skip Module
    Rewritten for TC 335 By Single Player Project Developer MDic
    Original Concept from conanhun513
+   https://discord.gg/TpxqWWT
    Modified for Azerothcore
 */
 
