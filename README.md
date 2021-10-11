@@ -1,5 +1,7 @@
 # ![logo](https://raw.githubusercontent.com/azerothcore/azerothcore.github.io/master/images/logo-github.png) AzerothCore
-## mod-skip-dk
+
+## mod-skip-dk-starting-area
+
 - Latest build status with azerothcore: [![Build Status](https://github.com/azerothcore/mod-skip-dk-starting-area/workflows/core-build/badge.svg?branch=master&event=push)](https://github.com/azerothcore/mod-skip-dk-starting-area)
 
 ## Description
@@ -18,10 +20,8 @@
 
 ## Installation
 
-```
-1) Simply place the module under the `modules` directory of your AzerothCore source. 
-3) Re-run cmake and launch a clean build of AzerothCore.
-```
+1. Simply place the module under the `modules` directory of your AzerothCore source. 
+1. Re-run CMake and rebuild the AzerothCore source.
 
 ## Edit module configuration (optional)
 
