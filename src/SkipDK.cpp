@@ -164,6 +164,10 @@ public:
                 Azerothcore_skip_deathknight_HandleSkip(player);
             }
         }
+		if (sConfigMgr->GetOption<bool>("DeleteGold.Deathknight.Optional.Enable", true))
+		{
+			player->SetMoney(1);
+		}	
     }
 };
 
@@ -219,6 +223,10 @@ public:
                 case YESSKIPDK:
                     Azerothcore_skip_deathknight_HandleSkip(player);
                     CloseGossipMenuFor(player);
+					if (sConfigMgr->GetOption<bool>("DeleteGold.Deathknight.Optional.Enable", true))
+					{
+						player->SetMoney(1);
+					}
                     break;
             }
             return true;
