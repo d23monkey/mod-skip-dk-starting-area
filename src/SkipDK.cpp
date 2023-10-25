@@ -166,7 +166,8 @@ public:
         }
 		if (sConfigMgr->GetOption<bool>("DeleteGold.Deathknight.Optional.Enable", true))
 		{
-			player->SetMoney(1);
+			int DKM = sConfigMgr->GetOption<int32>("StartHeroicPlayerMoney", 2000);
+            player->SetMoney(DKM);
 		}	
     }
 };
@@ -225,7 +226,8 @@ public:
                     CloseGossipMenuFor(player);
 					if (sConfigMgr->GetOption<bool>("DeleteGold.Deathknight.Optional.Enable", true))
 					{
-						player->SetMoney(1);
+					    int DKM = sConfigMgr->GetOption<int32>("StartHeroicPlayerMoney", 2000);
+                        player->SetMoney(DKM);
 					}
                     break;
             }
