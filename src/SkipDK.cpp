@@ -30,17 +30,15 @@
  */
 
 #include "AccountMgr.h"
-#include "ScriptMgr.h"
+#include "Chat.h"
+#include "Common.h"
+#include "Config.h"
+#include "ObjectAccessor.h"
+#include "ObjectMgr.h"
 #include "Player.h"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedGossip.h"
-#include "Config.h"
-#include "Common.h"
-#include "Chat.h"
-#include "ObjectAccessor.h"
-#include "ObjectMgr.h"
-#include "Player.h"
 #include "SharedDefines.h"
 #include "World.h"
 #include "WorldSession.h"
@@ -110,10 +108,23 @@ void Azerothcore_skip_deathknight_HandleSkip(Player* player)
     player->AddItem(38632, true);//Greatsword of the Ebon Blade
 
     int DKL = sConfigMgr->GetOption<float>("Skip.Deathknight.Start.Level", 58);
-    if (player->getLevel() <= DKL)
+    if (player->GetLevel() <= DKL)
     {
         //GiveLevel updates character properties more thoroughly than SetLevel
         player->GiveLevel(DKL);
+    }
+
+    if (sConfigMgr->GetOption<bool>("Skip.Deathknight.Start.Trained", false))
+    {
+        player->addSpell(49998, SPEC_MASK_ALL, true); // Death Strike rank 1
+        player->addSpell(47528, SPEC_MASK_ALL, true); // Mind Freeze
+        player->addSpell(46584, SPEC_MASK_ALL, true); // Raise Dead
+        player->addSpell(45524, SPEC_MASK_ALL, true); // Chains of Ice
+        player->addSpell(48263, SPEC_MASK_ALL, true); // Frost Presence
+        player->addSpell(50842, SPEC_MASK_ALL, true); // Pestilence
+        player->addSpell(53342, SPEC_MASK_ALL, true); // Rune of Spellshattering
+        player->addSpell(48721, SPEC_MASK_ALL, true); // Blood Boil rank 1
+        player->addSpell(54447, SPEC_MASK_ALL, true); // Rune of Spellbreaking
     }
 
     //Don't need to save all players, just current
@@ -143,13 +154,19 @@ void Azerothcore_skip_deathknight_HandleSkip(Player* player)
 class AzerothCore_skip_deathknight_announce : public PlayerScript
 {
 public:
-    AzerothCore_skip_deathknight_announce() : PlayerScript("AzerothCore_skip_deathknight_announce") { }
+    AzerothCore_skip_deathknight_announce() : PlayerScript("AzerothCore_skip_deathknight_announce", {
+        PLAYERHOOK_ON_LOGIN
+    }) { }
 
-    void OnLogin(Player* Player)
+    void OnPlayerLogin(Player* Player)
     {
         if (sConfigMgr->GetOption<bool>("Skip.Deathknight.Starter.Announce.enable", true) && (sConfigMgr->GetOption<bool>("Skip.Deathknight.Starter.Enable", true) || sConfigMgr->GetOption<bool>("Skip.Deathknight.Optional.Enable", true)))
         {
-            ChatHandler(Player->GetSession()).SendSysMessage("This server is running the |cff4CFF00Azerothcore Skip Deathknight Starter |rmodule.");
+			uint32 loc = Player->GetSession()->GetSessionDbLocaleIndex();
+            if (loc == 4)
+                ChatHandler(Player->GetSession()).SendSysMessage("|cff00ff00本服务端已加载|r |cff00ccffDK跳过起始区域 |r|cff00ff00模块.|r");
+            else
+				ChatHandler(Player->GetSession()).SendSysMessage("This server is running the |cff4CFF00Azerothcore Skip Deathknight Starter |rmodule.");
         }
     }
 };
@@ -157,9 +174,11 @@ public:
 class AzerothCore_skip_deathknight : public PlayerScript
 {
 public:
-    AzerothCore_skip_deathknight() : PlayerScript("AzerothCore_skip_deathknight") { }
+    AzerothCore_skip_deathknight() : PlayerScript("AzerothCore_skip_deathknight", {
+        PLAYERHOOK_ON_FIRST_LOGIN
+    }) { }
 
-    void OnFirstLogin(Player* player)
+    void OnPlayerFirstLogin(Player* player) override
     {
         if (player->GetAreaId() == 4342)
         {
@@ -177,7 +196,7 @@ public:
 #define LOCALE_LICHKING_1 "죽음의 기사 스타터 퀘스트 라인을 건너뛰고 싶습니다."
 #define LOCALE_LICHKING_2 "Je souhaite sauter la série de quêtes de démarrage du Chevalier de la mort."
 #define LOCALE_LICHKING_3 "Ich möchte die Todesritter-Starter-Questreihe überspringen."
-#define LOCALE_LICHKING_4 "我想跳過死亡騎士新手任務線。"
+#define LOCALE_LICHKING_4 "我想跳过死亡骑士新手任务线。"
 #define LOCALE_LICHKING_5 "我想跳過死亡騎士新手任務線。"
 #define LOCALE_LICHKING_6 "Deseo saltarme la línea de misiones de inicio del Caballero de la Muerte."
 #define LOCALE_LICHKING_7 "Deseo saltarme la línea de misiones de inicio del Caballero de la Muerte."
@@ -191,9 +210,7 @@ public:
         bool OnGossipHello(Player* player, Creature* creature) override
         {
             if (creature->IsQuestGiver())
-            {
                 player->PrepareQuestMenu(creature->GetGUID());
-            }
 
             if (sConfigMgr->GetOption<bool>("Skip.Deathknight.Optional.Enable", true))
             {
@@ -211,7 +228,7 @@ public:
                 case LOCALE_enUS: localizedEntry = LOCALE_LICHKING_0; break;
                 default: localizedEntry = LOCALE_LICHKING_0;
                 }
-                AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, localizedEntry, GOSSIP_SENDER_MAIN, YESSKIPDK, "Are you sure you want to skip the starting zone?", 0, false);
+                AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, localizedEntry, GOSSIP_SENDER_MAIN, YESSKIPDK, "你确定要跳过新手区吗?", 0, false);
             }
             player->TalkedToCreature(creature->GetEntry(), creature->GetGUID());
             SendGossipMenuFor(player, player->GetGossipTextId(creature), creature->GetGUID());
